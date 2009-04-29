@@ -1,0 +1,147 @@
+{% extends "training/base.html" %}
+
+{% block javascripts %}
+<script type="text/javascript" src="/static/reporters/javascripts/clear-form-elements.js"></script>
+<script type="text/javascript" src="/static/reporters/javascripts/cloneable.js"></script>
+{% endblock %}
+
+{% block content %}
+
+<div class="module">
+	<h2>Pending Messages</h2>
+	<table>
+		<thead>
+			<tr>
+				<th scope="col">Sender</th>
+				<th scope="col">Incoming Text</th>
+				<th scope="col">Response(s)</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody id="pending-messages">
+			<tr class="no-data">
+				<td colspan="4">
+					No messages are pending.
+				</td>
+			</tr>
+		</tbody>
+		<tfoot>
+			<tr>
+				<td colspan="4">
+					<a href="">
+						Export to Excel
+					</a>
+				</td>
+			</tr>
+		</tfoot>
+	</table>
+</div>
+
+
+<script type="text/javascript">
+	$(function() {
+		var container = $("#pending-messages");
+		
+		var update_vis = function() {
+			$("tr.no-data", container).css(
+				"display",  ($("tr", container).length == 1) ? "table-row" : "none"
+			);
+		};
+		
+		var click_accept = function(ev) {
+			var row = $(ev.target).parents("tr");
+			
+			/* extract the primary key back out of the
+			 * row class by dropping all non-numerics */
+			var pk = row[0].className.replace(/\D/g, "");
+			
+			/* build an array of the values entered
+			 * in each <input> within the row, which
+			 * will be sent back to the Reporter */
+			var responses = $.map(
+				$("input[type=text]", row),
+				function(input) {
+					return input.value;
+				}
+			);
+			
+			$.ajax({
+				"type": "POST",
+				"url":  "/ajax/training/accept",
+				"data": {
+					"msg_pk": pk,
+					"responses": responses
+				},
+				"success": function() {
+					row.remove();
+					update_vis();
+				}
+			});
+		};
+		
+		var update = function() {
+			$.getJSON("/ajax/training/pending", function(data) {
+				$.each(data, function() {
+					
+					/* if this message has not already been seen, and a row
+					 * has not been created (by trying to find it with a jQ
+					 * selector), we will create one now... */
+					var klass = ("msg-" + this["pk"]);
+					if($('tr.' + klass, container).length == 0) {
+						
+						/* create a text field for each response to
+						 * this message, o be embedded in the row */
+						var responses = $("<td></td>");
+						$.each(this["responses"], function() {
+							responses.append(
+								$('<div></div>').append(
+									'<input type="text" class="response" value="' + this["text"] + '"> '
+								)
+							);
+						});
+						
+						/* make each response clonable, so we can easily drop
+						 * superfluous messages, and add more useful errors */
+						$("div", responses).cloneable("response");
+						
+						var sender = $("<td></td>");
+						if(this["reporter"]) {
+							sender.append(
+								$('<a href="/reporters/' + this["reporter"]["pk"] + '"></a>')
+									.text(this["reporter"]["str"])
+							)
+						} else {
+							sender.text(this["connection"]["str"]);
+						}
+						
+						/* create an ACCEPT button with the appropriate click handler,
+						 * to post the modified responses back to the training App */
+						var acc = $('<input type="button" class="js-accept" value="Accept" title="Accept these responses">').click(click_accept);
+						
+						/* build the row for this message, including
+						 * the dynamic stuff we just build, and inject
+						 * it into the dom */
+						container.append(
+							$('<tr class="' + klass + '></tr>').append(
+								sender,
+								$("<td></td>").html(this["text"]),
+								responses,
+								$("<td></td>").append(acc)
+							)
+						);
+					} // if
+					
+					/* update the visibility of the "there are no
+					 * items!", because the items may have changed */
+					update_vis();
+				}); // each
+			}); // getJSON
+		}; // update
+		
+		/* pull the message list now (domready),
+		 * then every following few seconds */
+		setInterval(update, 5000);
+		update();
+	});
+</script>
+{% endblock %}

@@ -2,10 +2,8 @@
 # vim: ai ts=4 sts=4 et sw=4
 
 from django.conf.urls.defaults import *
-import apps.webui.views as views
+import apps.training.views as views
 
 urlpatterns = patterns('',
-    url(r'^$',     views.dashboard),
-    url(r'^ping$', views.check_availability),
+    url(r'^training$', views.index),
 )
-

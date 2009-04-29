@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# vim: ai ts=4 sts=4 et sw=4
+
 from django.db import models
 from apps.reporters.models import Reporter, PersistantConnection
 
@@ -9,6 +12,7 @@ class MessageInWaiting(models.Model):
         ('H', 'Handled'), # the message has been handled by the user but not sent
         ('S', 'Sent'), # the message has been sent
     )
+    
     # we need either a reporter or a connection to respond
     # TODO: this should be a dual-non-null key if that is possible
     reporter = models.ForeignKey(Reporter, null=True, blank=True)
@@ -17,23 +21,32 @@ class MessageInWaiting(models.Model):
     incoming_text = models.CharField(max_length=160)
     status = models.CharField(max_length=1, choices=STATUS_TYPES)
     
-    @staticmethod
-    def from_message(msg):
-        to_return = MessageInWaiting(time=msg.date, incoming_text=msg.text, status='P')
-        if msg.reporter:
-            to_return.reporter = msg.reporter
-        else:
-            to_return.connection = msg.persistant_connection 
-        return to_return
-    
+    @classmethod
+    def from_message(klass, msg):
+        return klass(
+            incoming_text=msg.text,
+            time=msg.date,
+            status="P",
+            
+            # link the message to the reporter
+            # or connection, whichever we have
+            **msg.persistance_dict)
     
     def get_connection(self):
         if self.reporter:
-            return self.reporter.connection
+            return self.reporter.connection()
         return self.connection
     
     def __unicode__(self):
         return self.incoming_text
+    
+    def __json__(self):
+	    return {
+		    "pk":         self.pk,
+		    "text":       self.incoming_text,
+		    "reporter":   self.reporter,
+		    "connection": self.connection,
+		    "responses":  list(self.responses.all()) }
 
 
 # TODO: better name    
@@ -47,10 +60,15 @@ class ResponseInWaiting(models.Model):
     )
     
     # TODO: better name - what is the antonym of response?
-    originator = models.ForeignKey(MessageInWaiting)
+    originator = models.ForeignKey(MessageInWaiting, related_name="responses")
     text = models.CharField(max_length=160)
     type = models.CharField(max_length=1, choices=RESPONSE_TYPES)
     
     def __unicode__(self):
         return self.text
 
+    def __json__(self):
+	    return {
+		    "pk":   self.pk,
+		    "text": self.text,
+		    "type": self.get_type_display() }
