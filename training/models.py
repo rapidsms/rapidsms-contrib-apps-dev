@@ -34,7 +34,7 @@ class MessageInWaiting(models.Model):
     
     def get_connection(self):
         if self.reporter:
-            return self.reporter.connection
+            return self.reporter.connection()
         return self.connection
     
     def __unicode__(self):
