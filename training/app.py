@@ -13,13 +13,55 @@ class App (rapidsms.app.App):
     
     PRIORITY = "last"
     
+    
     def ajax_GET_pending(self, params):
-    	
-    	# return all of the messages in waiting,
-    	# each of which contain their responses
-    	return list(MessageInWaiting.objects.all())
+
+        # return all of the messages in waiting,
+        # each of which contain their responses
+        return list(MessageInWaiting.objects.filter(status="P"))
     
     
+    def ajax_POST_accept(self, params, form):
+        msg = MessageInWaiting.objects.get(pk=int(form["msg_pk"]))
+        
+        # there might be one response, or there
+        # might be many -- make it iterable
+        responses = form.get("responses", [])
+        if not type(responses) == list:
+            responses = [responses]
+
+        for resp in responses:
+            
+            # if this response was present in the original
+            # set, and remains unchanged, just "confirm" it
+            originals = msg.responses.filter(text=resp, type="O")
+            if len(originals):
+                originals[0].type = "C"
+                originals[0].save()
+            
+            # this response is new, or changed!
+            # create a new ResponseInWaiting object
+            else:
+                ResponseInWaiting(
+                    originator=msg,
+                    text=resp,
+                    type="A").save()
+        
+        # find any remaining original responses, which
+        # were removed in the webui, and delete them
+        msg.responses.filter(type="O").delete()
+        
+        # mark the incoming message as "handled", so
+        # it will be picked up by the responder_loop
+        msg.status = "H"
+        msg.save()
+        
+        # TODO: send something more useful
+        # back to the browser to confirm
+        return True
+			
+
+
     def start (self):
         """Configure your app in the start phase."""
         # Start the Responder Thread -----------------------------------------
@@ -87,7 +129,7 @@ class App (rapidsms.app.App):
             # in the database, and send the responses
             for msg_in_waiting in MessageInWaiting.objects.filter(status="H"):
                 self.info("Responding to %s.", msg_in_waiting)
-                for response in msg_in_waiting.responseinwaiting_set.all():
+                for response in msg_in_waiting.responses.all():
                     self.info("Response: %s.", response)
                     # only send confirmed or added responses
                     if response.type != "O":
