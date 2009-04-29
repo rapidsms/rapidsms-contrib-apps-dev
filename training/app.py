@@ -11,6 +11,15 @@ class App (rapidsms.app.App):
        override the default response by adding their own.  This is meant
        to be used in trainings, to provide live feedback via SMS''' 
     
+    PRIORITY = "last"
+    
+    def ajax_GET_pending(self, params):
+    	
+    	# return all of the messages in waiting,
+    	# each of which contain their responses
+    	return list(MessageInWaiting.objects.all())
+    
+    
     def start (self):
         """Configure your app in the start phase."""
         # Start the Responder Thread -----------------------------------------
@@ -22,17 +31,14 @@ class App (rapidsms.app.App):
         responder_thread = threading.Thread(
                 target=self.responder_loop,
                 args=(response_interval,))
+        responder_thread.daemon = True
         responder_thread.start()
         
     def parse (self, message):
         """Parse and annotate messages in the parse phase."""
         pass
 
-    def handle (self, message):
-        """This should be one of the last apps running, because handle
-           should happen after the other apps have dealt with it so we
-           know whether any error responses have been set."""
-
+    def cleanup (self, message):
         if (self._requires_action(message)):
             # create the message in waiting object and response
             # in waiting objects for this, and assume someone will
@@ -48,11 +54,6 @@ class App (rapidsms.app.App):
             # blank out the responses, they will be sent by the responder thread
             # after moderation
             message.responses = []
-
-    def cleanup (self, message):
-        """Perform any clean up after all handlers have run in the
-           cleanup phase."""
-        pass
 
     def outgoing (self, message):
         """Handle outgoing message notifications."""
