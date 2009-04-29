@@ -1,0 +1,11 @@
+/* UNICEF RapidSMS UI
+ * vim:set noet:
+ * --
+ * training.css
+ * --
+ * Tweak the layout for the training UI. not
+ * much here right now; may stay that way */
+
+#pending-messages input.response {
+	width: 30em;
+}
