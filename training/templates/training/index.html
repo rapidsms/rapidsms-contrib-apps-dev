@@ -1,0 +1,104 @@
+{% extends "training/base.html" %}
+
+{% block javascripts %}
+<script type="text/javascript" src="/static/reporters/javascripts/clear-form-elements.js"></script>
+<script type="text/javascript" src="/static/reporters/javascripts/cloneable.js"></script>
+{% endblock %}
+
+{% block content %}
+
+<div class="module">
+	<h2>Pending Messages</h2>
+	<table>
+		<thead>
+			<tr>
+				<th scope="col">Sender</th>
+				<th scope="col">Incoming Text</th>
+				<th scope="col">Response(s)</th>
+				<td></td>
+			</tr>
+		</thead>
+		<tbody id="pending-messages">
+			<tr class="no-data">
+				<td colspan="3">
+					No messages are pending.
+				</td>
+			</tr>
+		</tbody>
+		<tfoot>
+			<tr>
+				<td colspan="3">
+					<a href="">
+						Export to Excel
+					</a>
+				</td>
+			</tr>
+		</tfoot>
+	</table>
+</div>
+
+
+<script type="text/javascript">
+	$(function() {
+		var container = $("#pending-messages");
+		
+		var click_accept = function() {
+		};
+		
+		var click_clear = function() {
+		};
+		
+		var update = function() {
+			$.getJSON("/ajax/training/pending", function(data) {
+				$.each(data, function() {
+					
+					/* if this message has not already been seen, and a row
+					 * has not been created (by trying to find it with a jQ
+					 * selector), we will create one now... */
+					var klass = ('msg-' + this["pk"]);
+					if($('tr.' + klass, container).length == 0) {
+						
+						/* create a text field for each response to
+						 * this message, o be embedded in the row */
+						var responses = $('<td></td>');
+						$.each(this["responses"], function() {
+							responses.append(
+								$('<div></div>').append(
+									'<input type="text" class="' + this["type"].toLowerCase() + '" value="' + this["text"] + '"> '
+								)
+							);
+						});
+						
+						/* make each response clonable, so we can easily drop
+						 * superfluous messages, and add more useful errors */
+						$("div", responses).cloneable("response");
+						
+						var acc = $('<input type="button" class="js-accept" value="Accept" title="Accept these responses">').click(click_accept);
+						var clr = $('<input type="button" class="js-clear" value="Clear" title="Do not send any of these responses">').click(click_clear);
+						
+						var actions = $("<td></td>").append(
+							accept, " ", clear);
+						
+						/* build the row for this message, including
+						 * the dynamic stuff we just build, and inject
+						 * it into the dom */
+						container.append(
+							$('<tr class="' + klass + '></tr>').append(
+								$('<td></td>').html(this["sender"]),
+								$('<td></td>').html(this["text"]),
+								responses,
+								actions
+							)
+						);
+					}
+				});
+			});
+		};
+		
+		/* pull the message list now (domready),
+		 * then every following few seconds */
+		setInterval(update, 5000);
+		update();
+	});
+</script>
+{% endblock %}
