@@ -21,15 +21,16 @@ class MessageInWaiting(models.Model):
     incoming_text = models.CharField(max_length=160)
     status = models.CharField(max_length=1, choices=STATUS_TYPES)
     
-    @staticmethod
-    def from_message(msg):
-        to_return = MessageInWaiting(time=msg.date, incoming_text=msg.text, status='P')
-        if msg.reporter:
-            to_return.reporter = msg.reporter
-        else:
-            to_return.connection = msg.persistant_connection 
-        return to_return
-    
+    @classmethod
+    def from_message(klass, msg):
+        return klass(
+            incoming_text=msg.text,
+            time=msg.date,
+            status="P",
+            
+            # link the message to the reporter
+            # or connection, whichever we have
+            **msg.persistance_dict)
     
     def get_connection(self):
         if self.reporter:
