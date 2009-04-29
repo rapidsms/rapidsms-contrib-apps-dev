@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# vim: ai ts=4 sts=4 et sw=4
+
 from django.db import models
 from apps.reporters.models import Reporter, PersistantConnection
 
@@ -9,6 +12,7 @@ class MessageInWaiting(models.Model):
         ('H', 'Handled'), # the message has been handled by the user but not sent
         ('S', 'Sent'), # the message has been sent
     )
+    
     # we need either a reporter or a connection to respond
     # TODO: this should be a dual-non-null key if that is possible
     reporter = models.ForeignKey(Reporter, null=True, blank=True)
@@ -34,6 +38,14 @@ class MessageInWaiting(models.Model):
     
     def __unicode__(self):
         return self.incoming_text
+    
+    def __json__(self):
+	    return {
+		    "pk":         self.pk,
+		    "text":       self.incoming_text,
+		    "reporter":   self.reporter,
+		    "connection": self.connection,
+		    "responses":  list(self.responses.all()) }
 
 
 # TODO: better name    
@@ -47,10 +59,15 @@ class ResponseInWaiting(models.Model):
     )
     
     # TODO: better name - what is the antonym of response?
-    originator = models.ForeignKey(MessageInWaiting)
+    originator = models.ForeignKey(MessageInWaiting, related_name="responses")
     text = models.CharField(max_length=160)
     type = models.CharField(max_length=1, choices=RESPONSE_TYPES)
     
     def __unicode__(self):
         return self.text
 
+    def __json__(self):
+	    return {
+		    "pk":   self.pk,
+		    "text": self.text,
+		    "type": self.get_type_display() }
