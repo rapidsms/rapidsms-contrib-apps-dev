@@ -122,7 +122,7 @@ class App (rapidsms.app.App):
         return to_return
     
     # Responder Thread --------------------
-    def responder_loop(self, seconds=30):
+    def responder_loop(self, seconds=10):
         self.info("Starting responder...")
         while True:
             # look for any new handled messages
