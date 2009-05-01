@@ -72,3 +72,16 @@ class ResponseInWaiting(models.Model):
 		    "pk":   self.pk,
 		    "text": self.text,
 		    "type": self.get_type_display() }
+
+
+class Template(models.Model):
+    """This model provides a place for efficient users of the
+       Training WebUI to store canned responses to common errors."""
+    key  = models.CharField(max_length=1, unique=True)
+    text = models.CharField(max_length=160, unique=True)
+
+    def __unicode__(self):
+        return self.text
+    
+    class Meta:
+        verbose_name = "Template"
