@@ -33,6 +33,41 @@
 	</table>
 </div>
 
+<div class="module templates">
+	<h2>Response Templates</h2>
+	<table>
+		<thead>
+			<tr>
+				<th scope="col" class="key">Key</th>
+				<th scope="col" class="text">Text</th>
+				<th class="gap"></th>
+				
+				<th scope="col" class="key">Key</th>
+				<th scope="col" class="text">Text</th>
+				<th class="gap"></th>
+				
+				<th scope="col" class="key">Key</th>
+				<th scope="col" class="text">Text</th>
+			</tr>
+		</thead>
+		<tbody>{% for tmpl in templates %}
+				{% cycle "<tr>" "" "" %}
+				<td>ctrl+<strong>{{ tmpl.key }}</strong></td>
+				<td><input type="text" name="template" id="tmpl-{{ tmpl.key }}" value="{{ tmpl.text }}" maxlength="140" /></td>
+				{% cycle "<td></td>" "<td></td>" "</tr>" %}{% endfor %}
+		</tbody>
+		<tfoot>
+			<tr>
+				<td colspan="8">
+					<a href="">
+						Export to Excel
+					</a>
+				</td>
+			</tr>
+		</tfoot>
+	</table>
+</div>
+
 
 <script type="text/javascript">
 	$(function() {
@@ -95,20 +130,30 @@
 		
 		var add_click = function(ev) {
 			$(ev.target).parent().prev().append(
-				$('<input type="text" class="response" value="">').
-					keyup(function(ev) {
-						if(ev.target.value == "") {
-							$(ev.target).remove();
-						}
-					})
+				$('<input type="text" class="added response" value="" maxlength="140">')
 			);
 		};
 		
-		var response_keyup = function(ev) {
-			if(($(ev.target).parent().children().length > 1) && (ev.target.value == "")) {
-				$(ev.target).remove();
+		container.keyup(function(ev) {
+			if($(ev.target).is("input.response")) {
+			
+				/* we're only interested in ctrl+[1-9] */
+				if(ev.ctrlKey) {
+					var w = ev.which;
+					if((w >= 49) && (w <= 57)) {
+					
+						/* insert the current value of the
+						 * numbered response template field */
+						var val = $("#tmpl-" + String.fromCharCode(w))[0].value;
+						if(val != "") ev.target.value = val;
+						return true;
+					}
+				}
+				
+				if($(ev.target).hasClass("added") && ev.target.value == "")
+					$(ev.target).remove();
 			}
-		}
+		});
 		
 		var update = function() {
 			$.getJSON("/ajax/training/pending", function(data) {
@@ -125,7 +170,7 @@
 						var responses = $("<td></td>");
 						$.each(this["responses"], function() {
 							responses.append(
-									$('<input type="text" class="response" value="' + this["text"] + '">')
+									$('<input type="text" class="response" value="' + this["text"] + '" maxlength="140">')
 							);
 						});
 						
