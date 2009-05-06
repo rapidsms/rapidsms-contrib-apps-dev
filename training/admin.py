@@ -6,3 +6,4 @@ from apps.training.models import *
 
 admin.site.register(MessageInWaiting)
 admin.site.register(ResponseInWaiting)
+admin.site.register(Template)
