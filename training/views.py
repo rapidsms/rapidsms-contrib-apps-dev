@@ -3,6 +3,16 @@
 
 from django.http import HttpResponse
 from rapidsms.webui.utils import render_to_response
+from apps.training.models import *
 
 def index(req):
-    return render_to_response(req, "training/index.html")
+    tmpls = Template.objects.values_list("key", "text")
+    tmpl_map = dict([(int(k), t) for k, t in tmpls])
+    
+    all_tmpls = [
+        { "key": n, "text": tmpl_map.get(n, "") }
+        for n in range(1,10)]
+    
+    return render_to_response(req,
+        "training/index.html",
+        { "templates": all_tmpls })

@@ -134,18 +134,19 @@ class App (rapidsms.app.App):
                     # only send confirmed or added responses
                     if response.type != "O":
                         db_connection = msg_in_waiting.get_connection()
-                        db_backend = db_connection.backend
-                        # we need to get the real backend from the router 
-                        # to properly send it 
-                        real_backend = self.router.get_backend(db_backend.name)
-                        if real_backend:
-                            connection = Connection(real_backend, db_connection.identity)
-                            response_msg = Message(connection, response.text)
-                            self.router.outgoing(response_msg)
-                        else:
-                            # TODO: should we fail harder here?  This will permanently
-                            # disable responses to this message which is bad.  
-                            self.error("Can't find backend %s.  Messages will not be sent", connection.backend.name)
+                        if db_connection is not None:
+		                      db_backend = db_connection.backend
+		                      # we need to get the real backend from the router 
+		                      # to properly send it 
+		                      real_backend = self.router.get_backend(db_backend.slug)
+		                      if real_backend:
+		                          connection = Connection(real_backend, db_connection.identity)
+		                          response_msg = Message(connection, response.text)
+		                          self.router.outgoing(response_msg)
+		                      else:
+		                          # TODO: should we fail harder here?  This will permanently
+		                          # disable responses to this message which is bad.  
+		                          self.error("Can't find backend %s.  Messages will not be sent", connection.backend.slug)
                 # mark the original message as responded to
                 msg_in_waiting.status="R"
                 msg_in_waiting.save()
