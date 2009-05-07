@@ -14,11 +14,18 @@ class App (rapidsms.app.App):
     PRIORITY = "last"
     
     
+    def ajax_GET_pending_count(self, params):
+    	
+    	# returns JUST the number of messages in waiting, which
+    	# indicates whether anyone is waiting for attention
+    	return MessageInWaiting.objects.filter(status="P").count()
+    
+    
     def ajax_GET_pending(self, params):
 
         # return all of the messages in waiting,
         # each of which contain their responses
-        return list(MessageInWaiting.objects.filter(status="P"))
+        return MessageInWaiting.objects.filter(status="P")
     
     
     def ajax_POST_accept(self, params, form):
@@ -59,7 +66,8 @@ class App (rapidsms.app.App):
         # TODO: send something more useful
         # back to the browser to confirm
         return True
-			
+
+
 
 
     def start (self):
