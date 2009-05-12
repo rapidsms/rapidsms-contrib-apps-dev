@@ -154,7 +154,7 @@ class App (rapidsms.app.App):
 		                      else:
 		                          # TODO: should we fail harder here?  This will permanently
 		                          # disable responses to this message which is bad.  
-		                          self.error("Can't find backend %s.  Messages will not be sent", connection.backend.slug)
+		                          self.error("Can't find backend %s.  Messages will not be sent")
                 # mark the original message as responded to
                 msg_in_waiting.status="R"
                 msg_in_waiting.save()
