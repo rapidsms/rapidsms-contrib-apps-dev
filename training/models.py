@@ -57,6 +57,7 @@ class ResponseInWaiting(models.Model):
         ('O', 'Original'), # the original response - as decided by RapidSMS.  These won't go out unless they are confirmed 
         ('C', 'Confirmed'), # an original response that is to be sent out as-is
         ('A', 'Added'), # when we want to send our own messages back
+        ('R', 'Responded') # when messages in the messageinwaiting model has been responded to
     )
     
     # TODO: better name - what is the antonym of response?
