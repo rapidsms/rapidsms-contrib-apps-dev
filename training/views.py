@@ -3,7 +3,7 @@
 
 from django.http import HttpResponse
 from rapidsms.webui.utils import render_to_response
-from apps.training.models import *
+from training.models import *
 
 def index(req):
     tmpls = Template.objects.values_list("key", "text")
