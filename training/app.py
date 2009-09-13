@@ -4,7 +4,7 @@
 
 import threading, time
 import rapidsms
-from apps.training.models import *
+from training.models import *
 from rapidsms.message import Message, StatusCodes
 from rapidsms.connection import Connection
 

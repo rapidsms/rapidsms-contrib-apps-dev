@@ -53,7 +53,7 @@ $(function() {
 		);
 		
 		/* POST the responses back to the method:
-		 * apps.training.app.App.ajax_POST_accept */ 
+		 * training.app.App.ajax_POST_accept */ 
 		$.ajax({
 			"type": "POST",
 			"url":  "/ajax/training/accept",
