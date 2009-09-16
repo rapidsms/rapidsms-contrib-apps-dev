@@ -5,7 +5,7 @@
 import threading, time
 import rapidsms
 from training.models import *
-from rapidsms.message import Message, StatusCodes
+from rapidsms.messages import IncomingMessage, OutgoingMessage, ErrorMessage
 from rapidsms.connection import Connection
 
 
@@ -127,10 +127,10 @@ class App (rapidsms.App):
         #   say "ok" on real responses, so only do this for known errors
         to_return = False
         for response in message.responses:
-            if response.status == StatusCodes.OK:
-                return False
-            elif response.status == StatusCodes.APP_ERROR or response.status == StatusCodes.GENERIC_ERROR:
+            if isinstance(response, ErrorMessage):
                 to_return = True
+            elif isinstance(response, OutgoingMessage):
+                return False
         return to_return
 
     # Responder Thread --------------------
@@ -153,7 +153,7 @@ class App (rapidsms.App):
                               real_backend = self.router.get_backend(db_backend.slug)
                               if real_backend:
                                   connection = Connection(real_backend, db_connection.identity)
-                                  response_msg = Message(connection, response.text)
+                                  response_msg = OutgoingMessage(connection, response.text)
                                   self.router.outgoing(response_msg)
                               else:
                                   # TODO: should we fail harder here?  This will permanently
