@@ -130,8 +130,8 @@ $(function() {
 					
 					/* create an ACCEPT button with the appropriate click handler,
 					 * to post the modified responses back to the training App */
-					var acc = $('<input type="button" class="js-accept" value="Accept" title="Accept these responses">').click(accept_click);
-					var add = $('<input type="button" class="js-add" value="Add" title="Add a response">').click(add_click);
+					var acc = $('<input type="button" class="js-button accept" value="Accept" title="Accept these responses">').click(accept_click);
+					var add = $('<input type="button" class="js-button add" value="Add" title="Add a response">').click(add_click);
 					
 					/* build the row for this message, including
 					 * the dynamic stuff we just build, and inject
