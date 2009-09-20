@@ -24,14 +24,15 @@
 }
 
 /* reserve just enough space in the
- * last column for two js buttons */
+ * last column for four js buttons */
 .training td.actions {
 	padding-left: 0;
-	width: 32px;
+	width: 64px;
 }
 
 /* fill the remaining space with the response
  * text field. TODO: check CSS[2,3] compatibility */
+.training input.message,
 .training input.response,
 .templates tbody input {
 	-moz-box-sizing: border-box;
