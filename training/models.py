@@ -2,7 +2,7 @@
 # vim: ai ts=4 sts=4 et sw=4
 
 from django.db import models
-from apps.reporters.models import Reporter, PersistantConnection
+from reporters.models import Reporter, PersistantConnection
 
 # TODO: better name
 class MessageInWaiting(models.Model):
