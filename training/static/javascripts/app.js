@@ -53,7 +53,7 @@ $(function() {
 		);
 		
 		/* POST the responses back to the method:
-		 * apps.training.app.App.ajax_POST_accept */ 
+		 * training.app.App.ajax_POST_accept */ 
 		$.ajax({
 			"type": "POST",
 			"url":  "/ajax/training/accept",
@@ -76,6 +76,14 @@ $(function() {
 		$(ev.target).parent().prev().append(
 			$('<input type="text" class="added response" value="" maxlength="140">')
 		);
+	};
+	
+	var del_click = function(ev) {
+		alert("no");
+	};
+	
+	var retry_click = function(ev) {
+		alert("no");
 	};
 	
 	container.keyup(function(ev) {
@@ -130,8 +138,10 @@ $(function() {
 					
 					/* create an ACCEPT button with the appropriate click handler,
 					 * to post the modified responses back to the training App */
-					var acc = $('<input type="button" class="js-accept" value="Accept" title="Accept these responses">').click(accept_click);
-					var add = $('<input type="button" class="js-add" value="Add" title="Add a response">').click(add_click);
+					var acc = $('<input type="button" class="js-button accept" value="Accept" title="Accept these responses">').click(accept_click);
+					var del = $('<input type="button" class="js-button del" value="Ignore" title="Ignore this message">').click(del_click);
+					var add = $('<input type="button" class="js-button add" value="Add" title="Add a response">').click(add_click);
+					var retry = $('<input type="button" class="js-button reload" value="Retry" title="Retry this message">').click(retry_click);
 					
 					/* build the row for this message, including
 					 * the dynamic stuff we just build, and inject
@@ -140,10 +150,9 @@ $(function() {
 						$('<tr class="msg ' + klass + '"></tr>').append(
 							sender,
 							$("<td></td>").append(
-								$("<div></div>").append(
-									this["text"])),
+								$('<input type="text" class="message" value="' + this["text"] + '" />')),
 							responses,
-							$('<td class="actions"></td>').append(add, acc)
+							$('<td class="actions"></td>').append(add, acc, retry, del)
 						)
 					);
 				} // if

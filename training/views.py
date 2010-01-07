@@ -2,7 +2,7 @@
 # vim: ai ts=4 sts=4 et sw=4
 
 from django.http import HttpResponse
-from rapidsms.webui.utils import render_to_response
+from rapidsms.djangoproject.utils import render_to_response
 from training.models import *
 
 def index(req):
