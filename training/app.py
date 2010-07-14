@@ -3,13 +3,13 @@
 
 
 import threading, time
-import rapidsms
 from .models import *
+from rapidsms.apps.base import AppBase
 from rapidsms.messages import IncomingMessage, OutgoingMessage, ErrorMessage
 from rapidsms.models import Connection
 
 
-class App (rapidsms.App):
+class App (AppBase):
     '''The training app saves error messages in a queue before they go out
        and waits for someone to either flag them as "ready to go out" or
        override the default response by adding their own.  This is meant
