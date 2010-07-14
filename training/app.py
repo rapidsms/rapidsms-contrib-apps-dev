@@ -4,9 +4,9 @@
 
 import threading, time
 import rapidsms
-from training.models import *
+from .models import *
 from rapidsms.messages import IncomingMessage, OutgoingMessage, ErrorMessage
-from rapidsms.connection import Connection
+from rapidsms.models import Connection
 
 
 class App (rapidsms.App):

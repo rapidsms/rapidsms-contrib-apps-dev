@@ -2,7 +2,7 @@
 # vim: ai ts=4 sts=4 et sw=4
 
 from django.db import models
-from contrib.reporters.models import Reporter, PersistantConnection
+from rapidsms.models import Connection, Contact
 
 # TODO: better name
 class MessageInWaiting(models.Model):
@@ -13,10 +13,10 @@ class MessageInWaiting(models.Model):
         ('S', 'Sent'), # the message has been sent
     )
     
-    # we need either a reporter or a connection to respond
+    # we need either a contact or a connection to respond
     # TODO: this should be a dual-non-null key if that is possible
-    reporter = models.ForeignKey(Reporter, null=True, blank=True)
-    connection = models.ForeignKey(PersistantConnection, null=True, blank=True)
+    contact = models.ForeignKey(Contact, null=True, blank=True)
+    connection = models.ForeignKey(Connection, null=True, blank=True)
     time = models.DateTimeField()
     incoming_text = models.CharField(max_length=160)
     status = models.CharField(max_length=1, choices=STATUS_TYPES)
@@ -34,7 +34,7 @@ class MessageInWaiting(models.Model):
     
     def get_connection(self):
         if self.reporter:
-            return self.reporter.connection()
+            return self.contact.connection()
         return self.connection
     
     def __unicode__(self):

@@ -2,8 +2,8 @@
 # vim: ai ts=4 sts=4 et sw=4
 
 from django.http import HttpResponse
-from rapidsms.djangoproject.utils import render_to_response
-from training.models import *
+from rapidsms.utils import render_to_response
+from .models import *
 
 def index(req):
     tmpls = Template.objects.values_list("key", "text")
