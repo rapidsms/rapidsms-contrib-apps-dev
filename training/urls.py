@@ -5,5 +5,5 @@ from django.conf.urls.defaults import *
 import views
 
 urlpatterns = patterns('',
-    url(r'^training$', views.index),
+    url(r'^training/$', views.index),
 )
